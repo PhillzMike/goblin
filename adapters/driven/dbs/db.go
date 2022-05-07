@@ -1,7 +1,6 @@
 package dbs
 
 import (
-	"fmt"
 	"github.com/Zaida-3dO/goblin/pkg/errs"
 	"gorm.io/gorm"
 )
@@ -35,7 +34,6 @@ func NewClient(name string) (SQLDBSetup, error) {
 
 func GetInstance(name string) *gorm.DB {
 	if DB == nil {
-		fmt.Printf("DB should NOT init\n")
 		InitDB(name)
 	}
 	return DB

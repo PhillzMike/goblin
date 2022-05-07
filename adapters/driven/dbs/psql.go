@@ -2,8 +2,6 @@ package dbs
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/Zaida-3dO/goblin/config"
 	"github.com/Zaida-3dO/goblin/internal/dtos"
@@ -15,12 +13,7 @@ import (
 type PSQLInit struct{}
 
 func (p *PSQLInit) NewDB() (*gorm.DB, error) {
-	path, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Printf("path is: %s\n", path)
-	config.LoadConfig(fmt.Sprintf("%s/config", path))
+	config.LoadConfig("./config")
 	connStr := fmt.Sprintf("user=%s dbname=%s password=%s host=%s sslmode=disable",
 		config.Cfg.DBUsername, config.Cfg.DBName, config.Cfg.DBPassword, config.Cfg.DBHost)
 

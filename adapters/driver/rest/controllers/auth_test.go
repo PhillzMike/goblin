@@ -1,4 +1,4 @@
-package tests
+package controllers
 
 import (
 	"fmt"
@@ -8,17 +8,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Zaida-3dO/goblin/adapters/driver/rest/controllers"
 	"github.com/gin-gonic/gin"
 )
 
-var authController = controllers.NewAuthController("test")
+var ac AuthController
 
 func TestRegister(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	ac = NewAuthController("test")
 
 	r := gin.Default()
-	r.POST("/v1/auth/register", authController.Register)
+	r.POST("/v1/auth/register", ac.Register)
 
 	params := url.Values{}
 	params.Add("first_name", "Chinonso")
