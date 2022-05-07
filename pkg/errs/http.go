@@ -1,7 +1,9 @@
 package errs
 
 import (
+	"fmt"
 	"net/http"
+	"reflect"
 )
 
 const (
@@ -27,8 +29,20 @@ func newErr(statusCode int, message, errorType string, data interface{}) *Err {
 	}
 }
 
-func (he *Err) Error() string {
-	return he.Message
+func (e *Err) Error() string {
+	return e.Message
+}
+
+func (e *Err) ErrorDetails() string {
+	return fmt.Sprintf("msg: %s, statuscode: %d, type: %s, data: %+v", e.Message, e.StatusCode, e.Type, e.Data)
+}
+
+func (e *Err) Equals(err *Err) bool {
+	if e.Message != err.Message || e.StatusCode != err.StatusCode ||
+		e.Type != err.Type || !reflect.DeepEqual(e.Data, err.Data) {
+		return false
+	}
+	return true
 }
 
 func NewBadRequestErr(message string, data interface{}) *Err {

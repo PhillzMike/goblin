@@ -16,14 +16,14 @@ type AuthService interface {
 }
 
 type authService struct {
-	userRepo repositories.UserRepo
+	userRepo      repositories.UserRepo
 	userTokenRepo repositories.UserTokenRepo
 }
 
-func NewAuthService() AuthService {
+func NewAuthService(mode string) AuthService {
 	var as AuthService = &authService{
-		userRepo:      repositories.NewUserRepo(),
-		userTokenRepo: repositories.NewUserTokenRepo(),
+		userRepo:      repositories.NewUserRepo(mode),
+		userTokenRepo: repositories.NewUserTokenRepo(mode),
 	}
 	return as
 }
@@ -43,7 +43,7 @@ func (as *authService) RegisterUser(req *ports.RegisterUserRequest) (*dtos.User,
 	}
 
 	colour, colourErr := common.UserDefaultProfileColour(req.FirstName, req.LastName)
-	if err != nil {
+	if colourErr != nil {
 		return nil, "", "", errs.NewBadRequestErr(colourErr.Error(), colourErr)
 	}
 

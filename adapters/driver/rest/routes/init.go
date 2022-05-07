@@ -6,7 +6,7 @@ import (
 )
 
 var router *gin.Engine
-var authController = controllers.NewAuthController()
+var authController = controllers.NewAuthController("")
 
 func InitRouter() {
 	router = gin.Default()

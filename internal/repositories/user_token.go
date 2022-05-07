@@ -15,7 +15,10 @@ type userTokenRepo struct {
 	psql *gorm.DB
 }
 
-func NewUserTokenRepo() UserTokenRepo {
+func NewUserTokenRepo(mode string) UserTokenRepo {
+	if mode == "test" {
+		return nil
+	}
 	var utr UserTokenRepo = &userTokenRepo{
 		psql: dbs.GetInstance("psql"),
 	}

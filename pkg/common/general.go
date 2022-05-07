@@ -1,10 +1,10 @@
 package common
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
-	"encoding/json"
 
 	"github.com/Zaida-3dO/goblin/pkg/errs"
 )
@@ -59,9 +59,6 @@ func MustBePresent(input interface{}, check interface{}, keyBindings []string) (
 	inp := structConv(input)
 	chk := structConv(check)
 
-	fmt.Printf("inp: %+v\n", inp)
-	fmt.Printf("chk: %+v\n", chk)
-
 	arr := make([]string, 0, len(keyBindings))
 	for _, key := range keyBindings {
 		if _, ok := inp[key]; !ok {
@@ -80,7 +77,7 @@ func ValidateHttpRequestsForMissingFields(data interface{}, req interface{}, key
 		return errs.NewInternalServerErr(err.Error(), err)
 	}
 	if len(missing) > 0 {
-		return errs.NewBadRequestErr("some fields are missing: ", missing)
+		return errs.NewBadRequestErr("some fields are missing", missing)
 	}
 	return nil
 }

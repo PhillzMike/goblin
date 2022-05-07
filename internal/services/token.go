@@ -2,11 +2,11 @@ package services
 
 import (
 	"fmt"
-	"time"
-	"github.com/Zaida-3dO/goblin/pkg/errs"
 	"github.com/Zaida-3dO/goblin/config"
-	"github.com/twinj/uuid"
+	"github.com/Zaida-3dO/goblin/pkg/errs"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/twinj/uuid"
+	"time"
 )
 
 type token struct {

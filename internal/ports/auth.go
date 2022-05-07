@@ -16,14 +16,6 @@ type RegisterUserRequest struct {
 }
 
 func (rur *RegisterUserRequest) ValidateRegisterUserRequest() *errs.Err {
-	// keyBindings := map[string]string{
-	// 	"FirstName":       "first_name",
-	// 	"LastName":        "last_name",
-	// 	"Email":           "email",
-	// 	"Password":        "password",
-	// 	"ConfirmPassword": "confirm_password",
-	// }
-
 	keyBindings := []string{"first_name", "last_name", "email", "password", "confirm_password"}
 
 	err := common.ValidateHttpRequestsForMissingFields(rur, RegisterUserRequest{}, keyBindings)
@@ -64,11 +56,6 @@ func NewLoginRequest(email, password string) (*LoginRequest, *errs.Err) {
 }
 
 func (lr *LoginRequest) ValidateLoginRequest() *errs.Err {
-	// keyBindings := map[string]string{
-	// 	"Email":    "email",
-	// 	"Password": "password",
-	// }
-
 	keyBindings := []string{"email", "password"}
 
 	err := common.ValidateHttpRequestsForMissingFields(lr, LoginRequest{}, keyBindings)

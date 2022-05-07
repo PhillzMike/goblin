@@ -1,9 +1,9 @@
 package dbs
 
 import (
+	"fmt"
 	"github.com/Zaida-3dO/goblin/pkg/errs"
 	"gorm.io/gorm"
-	"fmt"
 )
 
 var DB *gorm.DB
