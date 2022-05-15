@@ -78,13 +78,68 @@ func (lr *LoginRequest) ValidateLoginRequest() *errs.Err {
 	return nil
 }
 
-type LoginReply map[string]interface{}
-
-func NewLoginReply(user *dtos.User, accessToken, refreshToken, message string) *LoginReply {
-	return &LoginReply{
+func LoginReply(user *dtos.User, accessToken, refreshToken, message string) *map[string]interface{} {
+	return &map[string]interface{}{
 		"user":          user,
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 		"message":       message,
+	}
+}
+
+type ForgotPasswordRequest struct {
+	Email      string `json:"email"`
+	RedirectTo string `json:"redirect_to"`
+}
+
+func (fpr *ForgotPasswordRequest) ValidateForgotPasswordRequest() *errs.Err {
+	keyBindings := []string{"email", "redirect_to"}
+
+	err := common.ValidateHttpRequestsForMissingFields(fpr, ForgotPasswordRequest{}, keyBindings)
+	if err != nil {
+		return err
+	}
+
+	emailObject, newEmailErr := common.NewEmail(fpr.Email)
+	if newEmailErr != nil {
+		return errs.NewBadRequestErr(newEmailErr.Error(), newEmailErr)
+	}
+	fpr.Email = emailObject.Address
+
+	return nil
+}
+
+func ForgotPasswordReply(message string) *map[string]string {
+	return &map[string]string{
+		"message": message,
+	}
+}
+
+type ResetPasswordRequest struct {
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
+	Token           string `json:"token"`
+}
+
+func (rpr *ResetPasswordRequest) ValidateResetPasswordRequest() *errs.Err {
+	keyBindings := []string{"password", "confirm_password", "token"}
+
+	err := common.ValidateHttpRequestsForMissingFields(rpr, ResetPasswordRequest{}, keyBindings)
+	if err != nil {
+		return err
+	}
+
+	pwd, pwdErr := common.NewPassword(rpr.Password, rpr.ConfirmPassword)
+	if pwdErr != nil {
+		return err
+	}
+	rpr.Password = pwd.Value
+
+	return nil
+}
+
+func ResetPasswordReply(message string) *map[string]string {
+	return &map[string]string{
+		"message": message,
 	}
 }

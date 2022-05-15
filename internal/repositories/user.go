@@ -12,6 +12,7 @@ import (
 type UserRepo interface {
 	CreateUser(user dtos.User) *errs.Err
 	FindUserByEmail(user *dtos.User, email string) *errs.Err
+	SaveUser(user *dtos.User) *errs.Err
 }
 
 type userRepo struct {
@@ -39,6 +40,14 @@ func (ur *userRepo) FindUserByEmail(user *dtos.User, email string) *errs.Err {
 	err := ur.psql.Where("email = ?", email).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errs.NewNotFoundErr("user not found!", nil)
+	}
+	return nil
+}
+
+func (ur *userRepo) SaveUser(user *dtos.User) *errs.Err {
+	err := ur.psql.Save(user).Error
+	if err != nil {
+		return errs.NewInternalServerErr(err.Error(), err)
 	}
 	return nil
 }

@@ -12,6 +12,8 @@ import (
 type AuthController interface {
 	Register(c *gin.Context)
 	Login(c *gin.Context)
+	ForgotPassword(c *gin.Context)
+	ResetPassword(c *gin.Context)
 }
 
 type authController struct {
@@ -40,7 +42,7 @@ func (ac *authController) Register(c *gin.Context) {
 		return
 	}
 
-	response := ports.NewLoginReply(user, at, rt, "account created successfully")
+	response := ports.LoginReply(user, at, rt, "account created successfully")
 
 	c.JSON(http.StatusCreated, response)
 }
@@ -60,7 +62,45 @@ func (ac *authController) Login(c *gin.Context) {
 		return
 	}
 
-	response := ports.NewLoginReply(user, at, rt, "logged in successfully")
+	response := ports.LoginReply(user, at, rt, "logged in successfully")
 
+	c.JSON(http.StatusOK, response)
+}
+
+func (ac *authController) ForgotPassword(c *gin.Context) {
+	var request ports.ForgotPasswordRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		httpErr := errs.NewBadRequestErr("invalid json body", nil)
+		c.JSON(httpErr.StatusCode, httpErr)
+		return
+	}
+
+	err := ac.authService.ForgotPassword(&request)
+	if err != nil {
+		c.JSON(err.StatusCode, err)
+		return
+	}
+
+	response := ports.ForgotPasswordReply("check your email for instructions to retrieve your password")
+	c.JSON(http.StatusOK, response)
+}
+
+func (ac *authController) ResetPassword(c *gin.Context) {
+	var request ports.ResetPasswordRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		httpErr := errs.NewBadRequestErr("invalid json body", nil)
+		c.JSON(httpErr.StatusCode, httpErr)
+		return
+	}
+
+	err := ac.authService.ResetPassword(&request)
+	if err != nil {
+		c.JSON(err.StatusCode, err)
+		return
+	}
+
+	response := ports.ResetPasswordReply("your password has been reset successfully")
 	c.JSON(http.StatusOK, response)
 }

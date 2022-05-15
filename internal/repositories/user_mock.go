@@ -34,6 +34,10 @@ func (urm *UserRepoMock) FindUserByEmail(user *dtos.User, email string) *errs.Er
 	return errs.NewNotFoundErr("user not found!", nil)
 }
 
+func (urm *UserRepoMock) SaveUser(user *dtos.User) *errs.Err {
+	return nil
+}
+
 func (urm *UserRepoMock) ResetDB() {
 	userDB = make(map[uint]dtos.User)
 }
