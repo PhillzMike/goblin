@@ -2,11 +2,11 @@ package services
 
 import (
 	"fmt"
-	"time"
-	"github.com/Zaida-3dO/goblin/pkg/errs"
 	"github.com/Zaida-3dO/goblin/config"
-	"github.com/twinj/uuid"
+	"github.com/Zaida-3dO/goblin/pkg/errs"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/twinj/uuid"
+	"time"
 )
 
 type token struct {
@@ -107,12 +107,4 @@ func VerifyToken(tokenStr string, secret string) (*jwt.Token, *errs.Err) {
 		return nil, errs.NewUnauthorizedErr("cannot parse auth token", err)
 	}
 	return token, nil
-}
-
-func validateToken(token *jwt.Token) (*jwt.MapClaims, *errs.Err) {
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return nil, errs.NewInternalServerErr("cannot validate token", nil)
-	}
-	return &claims, nil
 }

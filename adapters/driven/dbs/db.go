@@ -3,13 +3,12 @@ package dbs
 import (
 	"github.com/Zaida-3dO/goblin/pkg/errs"
 	"gorm.io/gorm"
-	"fmt"
 )
 
 var DB *gorm.DB
 
 type SQLDBSetup interface {
-	NewDB() (db *gorm.DB, err error)
+	NewDB() (db *gorm.DB, err *errs.Err)
 }
 
 func InitDB(name string) {
@@ -24,7 +23,7 @@ func InitDB(name string) {
 	}
 }
 
-func NewClient(name string) (SQLDBSetup, error) {
+func NewClient(name string) (SQLDBSetup, *errs.Err) {
 	switch name {
 	case "psql":
 		return &PSQLInit{}, nil
@@ -35,7 +34,6 @@ func NewClient(name string) (SQLDBSetup, error) {
 
 func GetInstance(name string) *gorm.DB {
 	if DB == nil {
-		fmt.Printf("DB should NOT init\n")
 		InitDB(name)
 	}
 	return DB

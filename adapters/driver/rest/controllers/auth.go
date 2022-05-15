@@ -18,14 +18,14 @@ type authController struct {
 	authService services.AuthService
 }
 
-func NewAuthController() AuthController {
+func NewAuthController(mode string) AuthController {
 	var ac AuthController = &authController{
-		authService: services.NewAuthService(),
+		authService: services.NewAuthService(mode),
 	}
 	return ac
 }
 
-func (ac *authController) Register (c *gin.Context) {
+func (ac *authController) Register(c *gin.Context) {
 	var request ports.RegisterUserRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {

@@ -1,6 +1,8 @@
 package errs
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -11,38 +13,103 @@ const (
 	ErrUnauthorized        = "unauthorized"
 )
 
-type Err struct {
-	Message    string      `json:"message"`
-	StatusCode int         `json:"status"`
-	Type       string      `json:"type"`
-	Data       interface{} `json:"data"`
+type MarshalableErr []error
+
+func (m MarshalableErr) MarshalJSON() ([]byte, error) {
+	data := []byte("[")
+	for i, err := range m {
+		if i != 0 {
+			data = append(data, ',')
+		}
+		j, err := json.Marshal(err.Error())
+		if err != nil {
+			return nil, err
+		}
+		data = append(data, j...)
+	}
+	data = append(data, ']')
+	return data, nil
 }
 
-func newErr(statusCode int, message, errorType string, data interface{}) *Err {
-	return &Err{
-		message,
-		statusCode,
-		errorType,
-		data,
+type Err struct {
+	Message    string         `json:"message"`
+	StatusCode int            `json:"status"`
+	Type       string         `json:"type"`
+	Data       MarshalableErr `json:"data"`
+}
+
+func NewErr(statusCode int, message, errorType string, data error) *Err {
+	err := &Err{
+		Message:    message,
+		StatusCode: statusCode,
+		Type:       errorType,
+	}
+	err.Add(data)
+	return err
+}
+
+func (e *Err) GetStatusCode() int {
+	return e.StatusCode
+}
+
+func (e *Err) GetType() string {
+	return e.Type
+}
+
+func (e *Err) GetData() []error {
+	return e.Data
+}
+
+func (e *Err) HasData() bool {
+	return len(e.Data) > 0
+}
+
+func (e *Err) SetMessage(msg string) {
+	e.Message = msg
+}
+
+func (e *Err) Add(data error) {
+	if data != nil {
+		e.Data = append(e.Data, data)
 	}
 }
 
-func (he *Err) Error() string {
-	return he.Message
+func (e *Err) ErrorDetails() string {
+	return fmt.Sprintf("msg: %s, statuscode: %d, type: %s, data: %+v", e.Message, e.StatusCode, e.Type, e.Data)
 }
 
-func NewBadRequestErr(message string, data interface{}) *Err {
-	return newErr(http.StatusBadRequest, message, ErrBadRequest, data)
+func (e *Err) Equals(err *Err) bool {
+	if e.Message != err.Message || e.StatusCode != err.StatusCode ||
+		e.Type != err.Type || !compareErrors(e.Data, err.Data) {
+		return false
+	}
+	return true
 }
 
-func NewNotFoundErr(message string, data interface{}) *Err {
-	return newErr(http.StatusNotFound, message, ErrNotFound, data)
+func NewBadRequestErr(message string, data error) *Err {
+	return NewErr(http.StatusBadRequest, message, ErrBadRequest, data)
 }
 
-func NewInternalServerErr(message string, data interface{}) *Err {
-	return newErr(http.StatusInternalServerError, message, ErrInternalServerError, data)
+func NewNotFoundErr(message string, data error) *Err {
+	return NewErr(http.StatusNotFound, message, ErrNotFound, data)
 }
 
-func NewUnauthorizedErr(message string, data interface{}) *Err {
-	return newErr(http.StatusUnauthorized, message, ErrUnauthorized, data)
+func NewInternalServerErr(message string, data error) *Err {
+	return NewErr(http.StatusInternalServerError, message, ErrInternalServerError, data)
+}
+
+func NewUnauthorizedErr(message string, data error) *Err {
+	return NewErr(http.StatusUnauthorized, message, ErrUnauthorized, data)
+}
+
+func compareErrors(a, b []error) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i].Error() != b[i].Error() {
+			return false
+		}
+	}
+	return true
 }

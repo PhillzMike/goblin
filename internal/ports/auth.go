@@ -16,31 +16,29 @@ type RegisterUserRequest struct {
 }
 
 func (rur *RegisterUserRequest) ValidateRegisterUserRequest() *errs.Err {
-	// keyBindings := map[string]string{
-	// 	"FirstName":       "first_name",
-	// 	"LastName":        "last_name",
-	// 	"Email":           "email",
-	// 	"Password":        "password",
-	// 	"ConfirmPassword": "confirm_password",
-	// }
-
+	err := errs.NewBadRequestErr("some errors occurred", nil)
 	keyBindings := []string{"first_name", "last_name", "email", "password", "confirm_password"}
 
-	err := common.ValidateHttpRequestsForMissingFields(rur, RegisterUserRequest{}, keyBindings)
-	if err != nil {
-		return err
+	reqErr := common.ValidateHttpRequestsForMissingFields(rur, RegisterUserRequest{}, keyBindings)
+	if reqErr != nil {
+		return reqErr
 	}
 
 	em, newEmailErr := common.NewEmail(rur.Email)
 	if newEmailErr != nil {
-		return errs.NewBadRequestErr(newEmailErr.Error(), newEmailErr)
+		err.Add(newEmailErr)
 	}
-	rur.Email = em.Address
 
 	pwd, newPasswordErr := common.NewPassword(rur.Password, rur.ConfirmPassword)
 	if newPasswordErr != nil {
-		return errs.NewBadRequestErr(newPasswordErr.Error(), newPasswordErr)
+		err.Add(newPasswordErr)
 	}
+
+	if err.HasData() {
+		return err
+	}
+
+	rur.Email = em.Address
 	rur.Password = pwd.Value
 
 	return nil
@@ -64,11 +62,6 @@ func NewLoginRequest(email, password string) (*LoginRequest, *errs.Err) {
 }
 
 func (lr *LoginRequest) ValidateLoginRequest() *errs.Err {
-	// keyBindings := map[string]string{
-	// 	"Email":    "email",
-	// 	"Password": "password",
-	// }
-
 	keyBindings := []string{"email", "password"}
 
 	err := common.ValidateHttpRequestsForMissingFields(lr, LoginRequest{}, keyBindings)

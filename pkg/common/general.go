@@ -1,10 +1,10 @@
 package common
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
-	"encoding/json"
 
 	"github.com/Zaida-3dO/goblin/pkg/errs"
 )
@@ -41,47 +41,51 @@ func AbsInt[T Number](x T) T {
 	return absDiffInt(x, 0)
 }
 
-func UserDefaultProfileColour(firstName, lastName string) (*string, error) {
+func UserDefaultProfileColour(firstName, lastName string) (string, error) {
 	fullName := fmt.Sprintf("%s%s", strings.ToLower(firstName), strings.ToLower(lastName))
 	val := 0
 	for i := 0; i < len([]rune(fullName)); i++ {
 		asciiCode, err := getASCIICode(string(fullName[i]))
 		if err != nil {
-			return nil, errors.New("cannot get ascii code of anything but a character")
+			return "", errors.New("cannot get ascii code of anything but a character")
 		}
 		val += int(asciiCode) - 97
 	}
 	val %= len(color)
-	return &color[AbsInt(val)], nil
+	return color[AbsInt(val)], nil
 }
 
-func MustBePresent(input interface{}, check interface{}, keyBindings []string) ([]string, error) {
+func MustBePresent(input interface{}, check interface{}, keyBindings []string) ([]error, error) {
 	inp := structConv(input)
 	chk := structConv(check)
 
-	fmt.Printf("inp: %+v\n", inp)
-	fmt.Printf("chk: %+v\n", chk)
-
-	arr := make([]string, 0, len(keyBindings))
+	arr := make([]error, 0, len(keyBindings))
 	for _, key := range keyBindings {
 		if _, ok := inp[key]; !ok {
-			return []string{}, errors.New("invalid data interface for keybindings")
+			return []error{}, errors.New("invalid data interface for keybindings")
 		}
 		if inp[key] == chk[key] {
-			arr = append(arr, key)
+			arr = append(arr, errors.New(key))
 		}
 	}
 	return arr, nil
 }
 
 func ValidateHttpRequestsForMissingFields(data interface{}, req interface{}, keyBindings []string) *errs.Err {
-	missing, err := MustBePresent(data, req, keyBindings)
-	if err != nil {
-		return errs.NewInternalServerErr(err.Error(), err)
+	missing, presentErr := MustBePresent(data, req, keyBindings)
+	if presentErr != nil {
+		return errs.NewInternalServerErr(presentErr.Error(), presentErr)
 	}
-	if len(missing) > 0 {
-		return errs.NewBadRequestErr("some fields are missing: ", missing)
+
+	var err = errs.NewBadRequestErr("some fields are missing", nil)
+	for _, el := range missing {
+		err.Add(el)
 	}
+
+	if err.HasData() {
+		return err
+	}
+
 	return nil
 }
 

@@ -18,9 +18,12 @@ type userRepo struct {
 	psql *gorm.DB
 }
 
-func NewUserRepo() UserRepo {
+func NewUserRepo(mode string) UserRepo {
+	if mode == "test" {
+		return &UserRepoMock{}
+	}
 	return &userRepo{
-		psql: dbs.GetInstance("psql"),
+		psql: dbs.GetInstance(mode),
 	}
 }
 

@@ -16,19 +16,17 @@ type AuthService interface {
 }
 
 type authService struct {
-	userRepo repositories.UserRepo
+	userRepo      repositories.UserRepo
 	userTokenRepo repositories.UserTokenRepo
 }
 
-func NewAuthService() AuthService {
+func NewAuthService(mode string) AuthService {
 	var as AuthService = &authService{
-		userRepo:      repositories.NewUserRepo(),
-		userTokenRepo: repositories.NewUserTokenRepo(),
+		userRepo:      repositories.NewUserRepo(mode),
+		userTokenRepo: repositories.NewUserTokenRepo(mode),
 	}
 	return as
 }
-
-var ts = NewTokenService()
 
 func (as *authService) RegisterUser(req *ports.RegisterUserRequest) (*dtos.User, string, string, *errs.Err) {
 	err := req.ValidateRegisterUserRequest()
@@ -43,11 +41,11 @@ func (as *authService) RegisterUser(req *ports.RegisterUserRequest) (*dtos.User,
 	}
 
 	colour, colourErr := common.UserDefaultProfileColour(req.FirstName, req.LastName)
-	if err != nil {
+	if colourErr != nil {
 		return nil, "", "", errs.NewBadRequestErr(colourErr.Error(), colourErr)
 	}
 
-	user.Colour = *colour
+	user.Colour = colour
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
@@ -73,9 +71,11 @@ func (as *authService) RegisterUser(req *ports.RegisterUserRequest) (*dtos.User,
 
 func (as *authService) LoginUser(req *ports.LoginRequest) (*dtos.User, string, string, *errs.Err) {
 	var user dtos.User
+	var ts = NewTokenService()
+
 	err := as.userRepo.FindUserByEmail(&user, req.Email)
 	if err != nil {
-		return nil, "", "", err
+		return nil, "", "", errs.NewBadRequestErr("invalid login credentials", nil)
 	}
 
 	compareErr := common.ComparePassword(user.Password, req.Password)
@@ -96,7 +96,7 @@ func (as *authService) LoginUser(req *ports.LoginRequest) (*dtos.User, string, s
 		return nil, "", "", err
 	}
 
-	return &user, tokenPair.accessToken, tokenPair.refreshToken, nil
+	return &user, userToken.AccessToken, userToken.RefreshToken, nil
 }
 
 func (as *authService) checkIfUserExists(email string) *errs.Err {

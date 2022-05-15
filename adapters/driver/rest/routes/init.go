@@ -6,9 +6,11 @@ import (
 )
 
 var router *gin.Engine
-var authController = controllers.NewAuthController()
+var authController controllers.AuthController
 
-func InitRouter() {
+func Init() {
+	authController = controllers.NewAuthController("psql")
+
 	router = gin.Default()
 
 	mapAuthUrls()

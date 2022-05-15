@@ -2,6 +2,7 @@ package common
 
 import (
 	"errors"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
