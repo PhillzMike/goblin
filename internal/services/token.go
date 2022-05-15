@@ -108,11 +108,3 @@ func VerifyToken(tokenStr string, secret string) (*jwt.Token, *errs.Err) {
 	}
 	return token, nil
 }
-
-func validateToken(token *jwt.Token) (*jwt.MapClaims, *errs.Err) {
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return nil, errs.NewInternalServerErr("cannot validate token", nil)
-	}
-	return &claims, nil
-}

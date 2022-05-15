@@ -17,10 +17,10 @@ type userTokenRepo struct {
 
 func NewUserTokenRepo(mode string) UserTokenRepo {
 	if mode == "test" {
-		return nil
+		return &UserTokenRepoMock{}
 	}
 	var utr UserTokenRepo = &userTokenRepo{
-		psql: dbs.GetInstance("psql"),
+		psql: dbs.GetInstance(mode),
 	}
 	return utr
 }

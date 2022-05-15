@@ -27,14 +27,9 @@ func TestRegister(t *testing.T) {
 	params.Add("password", "password")
 	params.Add("confirm_password", "password")
 
-	fmt.Printf("printing data: %+v\n", params)
-
 	encoded := params.Encode()
 
-	fmt.Printf("encoded data: %+v\n", encoded)
-
 	req, err := http.NewRequest(http.MethodPost, "/v1/auth/register", strings.NewReader(encoded))
-	fmt.Printf("Request in test: %+v\n", req)
 	if err != nil {
 		t.Fatalf("couldn't create request: %v\n", err)
 	}

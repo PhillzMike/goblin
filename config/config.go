@@ -45,3 +45,7 @@ func LoadConfig(path string) {
 
 	Cfg = &configObject
 }
+
+func Init() {
+	LoadConfig("./config")
+}

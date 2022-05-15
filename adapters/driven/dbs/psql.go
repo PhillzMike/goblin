@@ -12,8 +12,7 @@ import (
 
 type PSQLInit struct{}
 
-func (p *PSQLInit) NewDB() (*gorm.DB, error) {
-	config.LoadConfig("./config")
+func (p *PSQLInit) NewDB() (*gorm.DB, *errs.Err) {
 	connStr := fmt.Sprintf("user=%s dbname=%s password=%s host=%s sslmode=disable",
 		config.Cfg.DBUsername, config.Cfg.DBName, config.Cfg.DBPassword, config.Cfg.DBHost)
 

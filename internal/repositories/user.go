@@ -20,10 +20,10 @@ type userRepo struct {
 
 func NewUserRepo(mode string) UserRepo {
 	if mode == "test" {
-		return nil
+		return &UserRepoMock{}
 	}
 	return &userRepo{
-		psql: dbs.GetInstance("psql"),
+		psql: dbs.GetInstance(mode),
 	}
 }
 
