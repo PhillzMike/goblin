@@ -75,7 +75,7 @@ func (as *authService) RegisterUser(req *ports.RegisterUserRequest) (*dtos.User,
 
 func (as *authService) LoginUser(req *ports.LoginRequest) (*dtos.User, string, string, *errs.Err) {
 	var user dtos.User
-	var ts = NewTokenService()
+	var ts = NewTokenService("psql")
 
 	err := as.userRepo.FindUserByEmail(&user, req.Email)
 	if err != nil {
@@ -104,7 +104,7 @@ func (as *authService) LoginUser(req *ports.LoginRequest) (*dtos.User, string, s
 }
 
 func (as authService) ForgotPassword(req *ports.ForgotPasswordRequest) *errs.Err {
-	var ts = NewTokenService()
+	var ts = NewTokenService("psql")
 
 	err := req.ValidateForgotPasswordRequest()
 	if err != nil {
@@ -130,7 +130,7 @@ func (as authService) ForgotPassword(req *ports.ForgotPasswordRequest) *errs.Err
 }
 
 func (as authService) ResetPassword(req *ports.ResetPasswordRequest) *errs.Err {
-	var ts = NewTokenService()
+	var ts = NewTokenService("psql")
 
 	err := req.ValidateResetPasswordRequest()
 	if err != nil {

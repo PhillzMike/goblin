@@ -82,7 +82,7 @@ func (ac *authController) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	response := ports.ForgotPasswordReply("check your email for instructions to retrieve your password")
+	response := ports.ForgotPasswordReply()
 	c.JSON(http.StatusOK, response)
 }
 
@@ -101,6 +101,6 @@ func (ac *authController) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	response := ports.ResetPasswordReply("your password has been reset successfully")
+	response := ports.ResetPasswordReply()
 	c.JSON(http.StatusOK, response)
 }

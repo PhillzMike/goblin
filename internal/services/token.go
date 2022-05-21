@@ -2,11 +2,14 @@ package services
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Zaida-3dO/goblin/config"
+	"github.com/Zaida-3dO/goblin/internal/dtos"
+	"github.com/Zaida-3dO/goblin/internal/repositories"
 	"github.com/Zaida-3dO/goblin/pkg/errs"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/twinj/uuid"
-	"time"
 )
 
 type token struct {
@@ -35,15 +38,22 @@ func NewToken(accessToken, refreshToken, emailToken, accessUUID,
 }
 
 type TokenService interface {
-	GenerateTokenPair(userId uint) (*token, *errs.Err)
-	GenerateEmailToken(email string) (*string, *errs.Err)
-	GetEmailFromToken(tokenStr string) (string, *errs.Err)
+	GenerateTokenPair(uint) (*token, *errs.Err)
+	GetUserFromAccessToken(string) (dtos.User, *errs.Err)
+	GenerateEmailToken(string) (*string, *errs.Err)
+	GetEmailFromToken(string) (string, *errs.Err)
 }
 
-type tokenService struct{}
+type tokenService struct {
+	userRepo     repositories.UserRepo
+	userRepoMock repositories.UserRepoMock
+}
 
-func NewTokenService() TokenService {
-	var ts TokenService = &tokenService{}
+func NewTokenService(mode string) TokenService {
+	var ts TokenService = &tokenService{
+		userRepo:     repositories.NewUserRepo(mode),
+		userRepoMock: repositories.UserRepoMock{},
+	}
 	return ts
 }
 
@@ -63,6 +73,31 @@ func (ts *tokenService) GenerateTokenPair(userId uint) (*token, *errs.Err) {
 	}
 
 	return &t, nil
+}
+
+func (ts *tokenService) GetUserFromAccessToken(tokenStr string) (dtos.User, *errs.Err) {
+	token, err := VerifyToken(tokenStr, config.Cfg.ATSecret)
+	if err != nil {
+		return dtos.User{}, err
+	}
+
+	var claims *jwt.MapClaims
+	claims, err = validateToken(token)
+	if err != nil {
+		return dtos.User{}, err
+	}
+
+	userId, ok := (*claims)["user_id"]
+	if !ok {
+		return dtos.User{}, errs.NewUnauthorizedErr("invalid token", nil)
+	}
+
+	user := dtos.User{ID: uint(userId.(float64))}
+	if err := ts.userRepo.GetUser(&user); err != nil {
+		return dtos.User{}, err
+	}
+
+	return user, nil
 }
 
 func (ts *tokenService) GenerateEmailToken(email string) (*string, *errs.Err) {

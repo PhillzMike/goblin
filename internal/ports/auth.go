@@ -109,9 +109,9 @@ func (fpr *ForgotPasswordRequest) ValidateForgotPasswordRequest() *errs.Err {
 	return nil
 }
 
-func ForgotPasswordReply(message string) *map[string]string {
+func ForgotPasswordReply() *map[string]string {
 	return &map[string]string{
-		"message": message,
+		"message": "check your email for instructions to retrieve your password",
 	}
 }
 
@@ -138,8 +138,8 @@ func (rpr *ResetPasswordRequest) ValidateResetPasswordRequest() *errs.Err {
 	return nil
 }
 
-func ResetPasswordReply(message string) *map[string]string {
+func ResetPasswordReply() *map[string]string {
 	return &map[string]string{
-		"message": message,
+		"message": "your password has been reset successfully",
 	}
 }

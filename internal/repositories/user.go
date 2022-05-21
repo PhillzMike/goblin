@@ -11,6 +11,7 @@ import (
 
 type UserRepo interface {
 	CreateUser(user dtos.User) *errs.Err
+	GetUser(user *dtos.User) *errs.Err
 	FindUserByEmail(user *dtos.User, email string) *errs.Err
 	SaveUser(user *dtos.User) *errs.Err
 }
@@ -32,6 +33,14 @@ func (ur *userRepo) CreateUser(user dtos.User) *errs.Err {
 	err := ur.psql.Create(&user).Error
 	if err != nil {
 		return errs.NewInternalServerErr(err.Error(), err)
+	}
+	return nil
+}
+
+func (ur *userRepo) GetUser(user *dtos.User) *errs.Err {
+	err := ur.psql.First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return errs.NewNotFoundErr("user not found!", nil)
 	}
 	return nil
 }
