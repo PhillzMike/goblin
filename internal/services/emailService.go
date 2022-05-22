@@ -12,6 +12,7 @@ import (
 type EmailServiceInterface interface {
 	SendForgotPasswordEmail(name, email, passwordResetToken, redirectTo string) *errs.Err
 	SendPasswordResetEmail(name, email string) *errs.Err
+	SendChangedPasswordEmail(name, email string) *errs.Err
 }
 
 type emailService struct{}
@@ -37,8 +38,6 @@ func newEmailDetails(body, recipient, subject, htmlTemplate string) *emailDetail
 }
 
 func (es *emailService) SendForgotPasswordEmail(name, email, passwordResetToken, redirectTo string) *errs.Err {
-	//fmt.Printf("name: %s, email: %s, passwordResetToken: %s, redirectTo: %s\n",
-	//	name, email, passwordResetToken, redirectTo)
 	htmlTemplate, err := es.getHTMLAsString("forgotPassword.html", "./pkg/emails/forgotPassword.html", struct {
 		Name         string
 		RecoveryLink string
@@ -51,6 +50,25 @@ func (es *emailService) SendForgotPasswordEmail(name, email, passwordResetToken,
 	}
 
 	details := newEmailDetails("", email, "Forgot Password", htmlTemplate)
+
+	if err = es.sendEmail(details); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (es *emailService) SendChangedPasswordEmail(name, email string) *errs.Err {
+	htmlTemplate, err := es.getHTMLAsString("passwordChanged.html", "./pkg/emails/passwordChanged.html", struct {
+		Name string
+	}{
+		name,
+	})
+	if err != nil {
+		return err
+	}
+
+	details := newEmailDetails("", email, "Changed Password", htmlTemplate)
 
 	if err = es.sendEmail(details); err != nil {
 		return err
