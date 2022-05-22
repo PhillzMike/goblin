@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/Zaida-3dO/goblin/internal/dtos"
 	"github.com/Zaida-3dO/goblin/internal/ports"
 	"github.com/Zaida-3dO/goblin/internal/repositories"
@@ -14,13 +16,11 @@ type UserService interface {
 
 type userService struct {
 	userRepo     repositories.UserRepo
-	emailService EmailServiceInterface
 }
 
 func NewUserService(mode string) UserService {
 	var us UserService = &userService{
 		userRepo:     repositories.NewUserRepo(mode),
-		emailService: NewEmailService(),
 	}
 	return us
 }
@@ -43,6 +43,13 @@ func (us *userService) ChangePassword(req *ports.ChangePasswordRequest, currentU
 	}
 
 	us.userRepo.SaveUser(currentUser)
+
+	es := NewEmailService()
+	
+	if err := es.SendChangedPasswordEmail(currentUser.FirstName, currentUser.Email); err != nil {
+		// log the error
+		fmt.Printf("error sending email: %v\n", err)
+	}
 
 	return nil
 }

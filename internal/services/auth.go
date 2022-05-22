@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Zaida-3dO/goblin/internal/dtos"
@@ -123,7 +124,8 @@ func (as authService) ForgotPassword(req *ports.ForgotPasswordRequest) *errs.Err
 	}
 
 	if err = as.emailService.SendForgotPasswordEmail(user.FirstName, req.Email, *passwordResetToken, req.RedirectTo); err != nil {
-		return err
+		// log the error
+		fmt.Printf("error sending email: %v\n", err)
 	}
 
 	return nil
@@ -161,7 +163,8 @@ func (as authService) ResetPassword(req *ports.ResetPasswordRequest) *errs.Err {
 	}
 
 	if err = as.emailService.SendPasswordResetEmail(user.FirstName, email); err != nil {
-		return err
+		// log the error
+		fmt.Printf("error sending email: %v\n", err)
 	}
 
 	return nil
