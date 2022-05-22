@@ -13,17 +13,21 @@ import (
 type AuthService interface {
 	RegisterUser(req *ports.RegisterUserRequest) (*dtos.User, string, string, *errs.Err)
 	LoginUser(req *ports.LoginRequest) (*dtos.User, string, string, *errs.Err)
+	ForgotPassword(req *ports.ForgotPasswordRequest) *errs.Err
+	ResetPassword(req *ports.ResetPasswordRequest) *errs.Err
 }
 
 type authService struct {
 	userRepo      repositories.UserRepo
 	userTokenRepo repositories.UserTokenRepo
+	emailService  EmailServiceInterface
 }
 
 func NewAuthService(mode string) AuthService {
 	var as AuthService = &authService{
 		userRepo:      repositories.NewUserRepo(mode),
 		userTokenRepo: repositories.NewUserTokenRepo(mode),
+		emailService:  NewEmailService(),
 	}
 	return as
 }
@@ -71,7 +75,7 @@ func (as *authService) RegisterUser(req *ports.RegisterUserRequest) (*dtos.User,
 
 func (as *authService) LoginUser(req *ports.LoginRequest) (*dtos.User, string, string, *errs.Err) {
 	var user dtos.User
-	var ts = NewTokenService()
+	var ts = NewTokenService("psql")
 
 	err := as.userRepo.FindUserByEmail(&user, req.Email)
 	if err != nil {
@@ -80,7 +84,7 @@ func (as *authService) LoginUser(req *ports.LoginRequest) (*dtos.User, string, s
 
 	compareErr := common.ComparePassword(user.Password, req.Password)
 	if compareErr != nil {
-		return nil, "", "", errs.NewBadRequestErr("invalid login credentials", compareErr)
+		return nil, "", "", errs.NewBadRequestErr("invalid login credentials", nil)
 	}
 
 	var tokenPair *token
@@ -97,6 +101,70 @@ func (as *authService) LoginUser(req *ports.LoginRequest) (*dtos.User, string, s
 	}
 
 	return &user, userToken.AccessToken, userToken.RefreshToken, nil
+}
+
+func (as authService) ForgotPassword(req *ports.ForgotPasswordRequest) *errs.Err {
+	var ts = NewTokenService("psql")
+
+	err := req.ValidateForgotPasswordRequest()
+	if err != nil {
+		return err
+	}
+
+	var user dtos.User
+	if err = as.userRepo.FindUserByEmail(&user, req.Email); err != nil {
+		return err
+	}
+
+	var passwordResetToken *string
+	passwordResetToken, err = ts.GenerateEmailToken(user.Email)
+	if err != nil {
+		return err
+	}
+
+	if err = as.emailService.SendForgotPasswordEmail(user.FirstName, req.Email, *passwordResetToken, req.RedirectTo); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (as authService) ResetPassword(req *ports.ResetPasswordRequest) *errs.Err {
+	var ts = NewTokenService("psql")
+
+	err := req.ValidateResetPasswordRequest()
+	if err != nil {
+		return err
+	}
+
+	var (
+		user  dtos.User
+		email string
+	)
+	email, err = ts.GetEmailFromToken(req.Token)
+	if err != nil {
+		return err
+	}
+
+	if err = as.userRepo.FindUserByEmail(&user, email); err != nil {
+		return err
+	}
+
+	var hashErr error
+	user.Password, hashErr = common.HashPassword(req.Password)
+	if err != nil {
+		return errs.NewInternalServerErr(hashErr.Error(), hashErr)
+	}
+
+	if err = as.userRepo.SaveUser(&user); err != nil {
+		return err
+	}
+
+	if err = as.emailService.SendPasswordResetEmail(user.FirstName, email); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (as *authService) checkIfUserExists(email string) *errs.Err {

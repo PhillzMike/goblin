@@ -20,6 +20,15 @@ func (urm *UserRepoMock) CreateUser(user dtos.User) *errs.Err {
 	return nil
 }
 
+func (urm *UserRepoMock) GetUser(user *dtos.User) *errs.Err {
+	usr, ok := userDB[user.ID]
+	if !ok {
+		return errs.NewNotFoundErr("user not found!", nil)
+	}
+	updateUser(user, usr)
+	return nil
+}
+
 func (urm *UserRepoMock) FindUserByEmail(user *dtos.User, email string) *errs.Err {
 	if userDB == nil {
 		return errs.NewNotFoundErr("user not found!", nil)
@@ -34,22 +43,26 @@ func (urm *UserRepoMock) FindUserByEmail(user *dtos.User, email string) *errs.Er
 	return errs.NewNotFoundErr("user not found!", nil)
 }
 
+func (urm *UserRepoMock) SaveUser(user *dtos.User) *errs.Err {
+	return nil
+}
+
 func (urm *UserRepoMock) ResetDB() {
 	userDB = make(map[uint]dtos.User)
 }
 
-func updateUser(user1 *dtos.User, user2 dtos.User) {
-	user1.CreatedAt = user2.CreatedAt
-	user1.UpdatedAt = user2.UpdatedAt
-	user1.LastName = user2.LastName
-	user1.Email = user2.Email
-	user1.PhoneNumber = user2.PhoneNumber
-	user1.Password = user2.Password
-	user1.EmailVerificationCode = user2.EmailVerificationCode
-	user1.IsEmailVerified = user2.IsEmailVerified
-	user1.PasswordResetToken = user2.PasswordResetToken
-	user1.PasswordResetTokenExpiryDate = user2.PasswordResetTokenExpiryDate
-	user1.Colour = user2.Colour
-	user1.Gender = user2.Gender
-	user1.FirstName = user2.FirstName
+func updateUser(dest *dtos.User, src dtos.User) {
+	dest.CreatedAt = src.CreatedAt
+	dest.UpdatedAt = src.UpdatedAt
+	dest.LastName = src.LastName
+	dest.Email = src.Email
+	dest.PhoneNumber = src.PhoneNumber
+	dest.Password = src.Password
+	dest.EmailVerificationCode = src.EmailVerificationCode
+	dest.IsEmailVerified = src.IsEmailVerified
+	dest.PasswordResetToken = src.PasswordResetToken
+	dest.PasswordResetTokenExpiryDate = src.PasswordResetTokenExpiryDate
+	dest.Colour = src.Colour
+	dest.Gender = src.Gender
+	dest.FirstName = src.FirstName
 }
