@@ -7,5 +7,6 @@ import (
 func mapUserUrls() {
 	userRouter := router.Group("/v1/users", middlewares.Authorization())
 
-	userRouter.POST("/change-password", userController.ChangePassword)
+	userRouter.PUT("/change-password", userController.ChangePassword)
+	userRouter.PUT("/", userController.UpdateUser)
 }

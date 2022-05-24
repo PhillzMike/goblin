@@ -1,6 +1,7 @@
 package ports
 
 import (
+	"github.com/Zaida-3dO/goblin/internal/dtos"
 	"github.com/Zaida-3dO/goblin/pkg/common"
 	"github.com/Zaida-3dO/goblin/pkg/errs"
 )
@@ -30,5 +31,38 @@ func (cpr *ChangePasswordRequest) ValidateChangePasswordRequest() *errs.Err {
 func ChangePasswordReply() *map[string]interface{} {
 	return &map[string]interface{}{
 		"message": "password changed successfully",
+	}
+}
+
+type UpdateUserRequest struct {
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
+	Gender      string `json:"gender"`
+}
+
+func (uur *UpdateUserRequest) ValidateUpdateUserRequest() *errs.Err {
+	keyBindings := []string{"first_name", "last_name", "email", "phone_number", "gender"}
+
+	err := common.ValidateHttpRequestsForMissingFields(uur, UpdateUserRequest{}, keyBindings)
+	if err != nil {
+		return err
+	}
+
+	email, emailErr := common.NewEmail(uur.Email)
+	if emailErr != nil {
+		return errs.NewBadRequestErr(emailErr.Error(), emailErr)
+	}
+
+	uur.Email = email.Address
+
+	return nil
+}
+
+func UpdateUserReply(user dtos.User) *map[string]interface{} {
+	return &map[string]interface{}{
+		"message": "your details have been successfully updated",
+		"user": user.Strip(),
 	}
 }

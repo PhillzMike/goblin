@@ -42,6 +42,9 @@ func (ur *userRepo) GetUser(user *dtos.User) *errs.Err {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errs.NewNotFoundErr("user not found!", nil)
 	}
+	if err != nil {
+		return errs.NewInternalServerErr(err.Error(), err)
+	}
 	return nil
 }
 
@@ -49,6 +52,9 @@ func (ur *userRepo) FindUserByEmail(user *dtos.User, email string) *errs.Err {
 	err := ur.psql.Where("email = ?", email).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errs.NewNotFoundErr("user not found!", nil)
+	}
+	if err != nil {
+		return errs.NewInternalServerErr(err.Error(), err)
 	}
 	return nil
 }

@@ -80,7 +80,7 @@ func (lr *LoginRequest) ValidateLoginRequest() *errs.Err {
 
 func LoginReply(user *dtos.User, accessToken, refreshToken, message string) *map[string]interface{} {
 	return &map[string]interface{}{
-		"user":          user,
+		"user":          user.Strip(),
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 		"message":       message,

@@ -13,6 +13,7 @@ import (
 
 type UserController interface {
 	ChangePassword(c *gin.Context)
+	UpdateUser(c *gin.Context)
 }
 
 type userController struct {
@@ -27,7 +28,7 @@ func NewUserController(mode string) UserController {
 }
 
 func (uc *userController) ChangePassword(c *gin.Context) {
-	user, b := GetUserFromContext(c)
+	user, b := GetCurrentUser(c)
 	if !b {
 		return
 	}
@@ -49,7 +50,30 @@ func (uc *userController) ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
-func GetUserFromContext(c *gin.Context) (*dtos.User, bool) {
+func (uc *userController) UpdateUser(c *gin.Context) {
+	user, b := GetCurrentUser(c)
+	if !b {
+		return
+	}
+
+	var request ports.UpdateUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		httpErr := errs.NewBadRequestErr("invalid json body", err)
+		c.JSON(httpErr.StatusCode, httpErr)
+		return
+	}
+
+	if err := uc.userService.UpdateUser(&request, user); err != nil {
+		c.JSON(err.StatusCode, err)
+		return
+	}
+
+	response := ports.UpdateUserReply(*user)
+
+	c.JSON(http.StatusCreated, response)
+}
+
+func GetCurrentUser(c *gin.Context) (*dtos.User, bool) {
 	if c.Writer.Status() == http.StatusUnauthorized {
 		err := errs.NewUnauthorizedErr("unauthorized access", c.Errors[0])
 		c.JSON(http.StatusUnauthorized, err)

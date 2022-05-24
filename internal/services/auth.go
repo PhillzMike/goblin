@@ -40,7 +40,7 @@ func (as *authService) RegisterUser(req *ports.RegisterUserRequest) (*dtos.User,
 	}
 
 	var user = dtos.NewUser(req.FirstName, req.LastName, req.Email, req.PhoneNumber, req.Password)
-	err = as.checkIfUserExists(req.Email)
+	err = EnsureEmailNotTaken(as.userRepo, req.Email)
 	if err != nil {
 		return nil, "", "", err
 	}
@@ -167,14 +167,5 @@ func (as authService) ResetPassword(req *ports.ResetPasswordRequest) *errs.Err {
 		fmt.Printf("error sending email: %v\n", err)
 	}
 
-	return nil
-}
-
-func (as *authService) checkIfUserExists(email string) *errs.Err {
-	var user dtos.User
-	err := as.userRepo.FindUserByEmail(&user, email)
-	if err == nil {
-		return errs.NewBadRequestErr("email has been taken!", nil)
-	}
 	return nil
 }
