@@ -47,6 +47,15 @@ func (urm *UserRepoMock) SaveUser(user *dtos.User) *errs.Err {
 	return nil
 }
 
+func (urm *UserRepoMock) DeleteUser(user dtos.User) *errs.Err {
+	if userDB == nil {
+		return errs.NewInternalServerErr("user DB is nil", nil)
+	}
+
+	delete(userDB, user.ID)
+	return nil
+}
+
 func (urm *UserRepoMock) ResetDB() {
 	userDB = make(map[uint]dtos.User)
 }
