@@ -13,6 +13,8 @@ const (
 	ErrUnauthorized        = "unauthorized"
 )
 
+// MarshalableErr is a custom type for a slice of error types
+// It allows the error type to be 'marshable' by JSON.
 type MarshalableErr []error
 
 func (m MarshalableErr) MarshalJSON() ([]byte, error) {
@@ -74,6 +76,8 @@ func (e *Err) Add(data error) {
 	}
 }
 
+// ErrorDetails returns a stringified representation of the
+// fields contained in Err
 func (e *Err) ErrorDetails() string {
 	return fmt.Sprintf("msg: %s, statuscode: %d, type: %s, data: %+v", e.Message, e.StatusCode, e.Type, e.Data)
 }
@@ -86,18 +90,22 @@ func (e *Err) Equals(err *Err) bool {
 	return true
 }
 
+// NewBadRequestErr returns the Err object for http bad_request
 func NewBadRequestErr(message string, data error) *Err {
 	return NewErr(http.StatusBadRequest, message, ErrBadRequest, data)
 }
 
+// NewNotFoundErr returns the Err object for http bad_request
 func NewNotFoundErr(message string, data error) *Err {
 	return NewErr(http.StatusNotFound, message, ErrNotFound, data)
 }
 
+// NewInternalServerErr returns the Err object for http bad_request
 func NewInternalServerErr(message string, data error) *Err {
 	return NewErr(http.StatusInternalServerError, message, ErrInternalServerError, data)
 }
 
+// NewUnauthorizedErr returns the Err object for http bad_request
 func NewUnauthorizedErr(message string, data error) *Err {
 	return NewErr(http.StatusUnauthorized, message, ErrUnauthorized, data)
 }

@@ -37,8 +37,15 @@ func absDiffInt[T Number](x, y T) T {
 	return x - y
 }
 
+// AbsInt takes in a generic type that supports all number types
+// and returns the absolute value of the number
 func AbsInt[T Number](x T) T {
 	return absDiffInt(x, 0)
+}
+
+func ExampleAbsInt() {
+	AbsInt(-123)
+	// Output: 123
 }
 
 func UserDefaultProfileColour(firstName, lastName string) (string, error) {
