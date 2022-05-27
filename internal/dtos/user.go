@@ -5,15 +5,15 @@ import (
 )
 
 type APIUser struct {
-	ID                           uint      `json:"id"`
-	CreatedAt                    time.Time `json:"created_at"`
-	UpdatedAt                    time.Time `json:"updated_at"`
-	FirstName                    string    `json:"first_name"`
-	LastName                     string    `json:"last_name"`
-	Email                        string    `json:"email"`
-	PhoneNumber                  string    `json:"phone_number"`
-	Colour                       string    `json:"colour"`
-	Gender                       string    `json:"gender"`
+	ID          uint      `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	FirstName   string    `json:"first_name"`
+	LastName    string    `json:"last_name"`
+	Email       string    `json:"email"`
+	PhoneNumber string    `json:"phone_number"`
+	Colour      string    `json:"colour"`
+	Gender      string    `json:"gender"`
 }
 
 func NewAPIUser(
@@ -28,15 +28,15 @@ func NewAPIUser(
 	gender string,
 ) APIUser {
 	return APIUser{
-		ID: id,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
-		FirstName:       firstName,
-		LastName:        lastName,
-		Email:           email,
-		PhoneNumber:     phoneNumber,
-		Colour: colour,
-		Gender: gender,
+		ID:          id,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
+		FirstName:   firstName,
+		LastName:    lastName,
+		Email:       email,
+		PhoneNumber: phoneNumber,
+		Colour:      colour,
+		Gender:      gender,
 	}
 }
 

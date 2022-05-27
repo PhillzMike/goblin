@@ -176,16 +176,16 @@ func (t *token) generateEmailToken(email string) error {
 		return err
 	}
 
-		return nil
-	}
+	return nil
+}
 
-	func VerifyToken(tokenStr string, secret string, fromAuth bool) (*jwt.Token, *errs.Err) {
-		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
-			}
-			return []byte(secret), nil
-		})
+func VerifyToken(tokenStr string, secret string, fromAuth bool) (*jwt.Token, *errs.Err) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
+		}
+		return []byte(secret), nil
+	})
 	if err != nil {
 		if fromAuth {
 			return nil, errs.NewUnauthorizedErr("invalid auth token", err)

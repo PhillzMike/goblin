@@ -63,7 +63,7 @@ func (uur *UpdateUserRequest) ValidateUpdateUserRequest() *errs.Err {
 func UpdateUserReply(user dtos.User) *map[string]interface{} {
 	return &map[string]interface{}{
 		"message": "your details have been successfully updated",
-		"user": user.Strip(),
+		"user":    user.Strip(),
 	}
 }
 
@@ -73,7 +73,7 @@ type DeleteUserRequest struct {
 
 func (dur *DeleteUserRequest) ValidateDeleteUserRequest() *errs.Err {
 	keyBindings := []string{"password"}
-	
+
 	err := common.ValidateHttpRequestsForMissingFields(dur, DeleteUserRequest{}, keyBindings)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (dur *DeleteUserRequest) ValidateDeleteUserRequest() *errs.Err {
 }
 
 func DeleteUserReply() *map[string]interface{} {
-	return &map[string]interface{} {
+	return &map[string]interface{}{
 		"message": "your account has been deleted successfully",
 	}
 }

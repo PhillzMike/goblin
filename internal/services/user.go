@@ -17,12 +17,12 @@ type UserService interface {
 }
 
 type userService struct {
-	userRepo     repositories.UserRepo
+	userRepo repositories.UserRepo
 }
 
 func NewUserService(mode string) UserService {
 	var us UserService = &userService{
-		userRepo:     repositories.NewUserRepo(mode),
+		userRepo: repositories.NewUserRepo(mode),
 	}
 	return us
 }
@@ -47,7 +47,7 @@ func (us *userService) ChangePassword(req *ports.ChangePasswordRequest, currentU
 	us.userRepo.SaveUser(currentUser)
 
 	es := NewEmailService()
-	
+
 	if err := es.SendChangedPasswordEmail(currentUser.FirstName, currentUser.Email); err != nil {
 		// log the error
 		fmt.Printf("error sending email: %v\n", err)
@@ -99,6 +99,6 @@ func EnsureUserIsNotCurrentUserIfExists(repo repositories.UserRepo, currentUser 
 	var user dtos.User
 	if err := repo.FindUserByEmail(&user, email); err == nil && user.ID != currentUser.ID {
 		return nil, errs.NewBadRequestErr("email has been taken!", nil)
-	} 
+	}
 	return &user, nil
 }
