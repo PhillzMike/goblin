@@ -66,3 +66,24 @@ func UpdateUserReply(user dtos.User) *map[string]interface{} {
 		"user": user.Strip(),
 	}
 }
+
+type DeleteUserRequest struct {
+	Password string `json:password`
+}
+
+func (dur *DeleteUserRequest) ValidateDeleteUserRequest() *errs.Err {
+	keyBindings := []string{"password"}
+	
+	err := common.ValidateHttpRequestsForMissingFields(dur, DeleteUserRequest{}, keyBindings)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteUserReply() *map[string]interface{} {
+	return &map[string]interface{} {
+		"message": "your account has been deleted successfully",
+	}
+}

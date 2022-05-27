@@ -9,4 +9,5 @@ func mapUserUrls() {
 
 	userRouter.PUT("/change-password", userController.ChangePassword)
 	userRouter.PUT("/", userController.UpdateUser)
+	userRouter.DELETE("/", userController.DeleteUser)
 }

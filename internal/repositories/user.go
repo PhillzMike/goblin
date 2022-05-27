@@ -11,6 +11,7 @@ import (
 
 type UserRepo interface {
 	CreateUser(user dtos.User) *errs.Err
+	DeleteUser(user dtos.User) *errs.Err
 	GetUser(user *dtos.User) *errs.Err
 	FindUserByEmail(user *dtos.User, email string) *errs.Err
 	SaveUser(user *dtos.User) *errs.Err
@@ -64,5 +65,13 @@ func (ur *userRepo) SaveUser(user *dtos.User) *errs.Err {
 	if err != nil {
 		return errs.NewInternalServerErr(err.Error(), err)
 	}
+	return nil
+}
+
+func (ur *userRepo) DeleteUser(user dtos.User) *errs.Err {
+	if err := ur.psql.Delete(&user).Error; err != nil {
+		return errs.NewInternalServerErr("error deleting user", err)
+	}
+
 	return nil
 }

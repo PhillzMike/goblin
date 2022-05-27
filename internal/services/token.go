@@ -76,7 +76,7 @@ func (ts *tokenService) GenerateTokenPair(userId uint) (*token, *errs.Err) {
 }
 
 func (ts *tokenService) GetUserFromAccessToken(tokenStr string) (dtos.User, *errs.Err) {
-	token, err := VerifyToken(tokenStr, config.Cfg.ATSecret)
+	token, err := VerifyToken(tokenStr, config.Cfg.ATSecret, true)
 	if err != nil {
 		return dtos.User{}, err
 	}
@@ -112,7 +112,7 @@ func (ts *tokenService) GenerateEmailToken(email string) (*string, *errs.Err) {
 }
 
 func (ts *tokenService) GetEmailFromToken(tokenStr string) (string, *errs.Err) {
-	token, err := VerifyToken(tokenStr, config.Cfg.ETSecret)
+	token, err := VerifyToken(tokenStr, config.Cfg.ETSecret, false)
 	if err != nil {
 		return "", err
 	}
@@ -176,18 +176,21 @@ func (t *token) generateEmailToken(email string) error {
 		return err
 	}
 
-	return nil
-}
+		return nil
+	}
 
-func VerifyToken(tokenStr string, secret string) (*jwt.Token, *errs.Err) {
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
-		}
-		return []byte(secret), nil
-	})
+	func VerifyToken(tokenStr string, secret string, fromAuth bool) (*jwt.Token, *errs.Err) {
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
+			}
+			return []byte(secret), nil
+		})
 	if err != nil {
-		return nil, errs.NewUnauthorizedErr("cannot parse auth token", err)
+		if fromAuth {
+			return nil, errs.NewUnauthorizedErr("invalid auth token", err)
+		}
+		return nil, errs.NewBadRequestErr("invalid token", err)
 	}
 	return token, nil
 }
